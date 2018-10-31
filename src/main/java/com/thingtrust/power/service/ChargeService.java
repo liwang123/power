@@ -39,6 +39,9 @@ public class ChargeService {
     @Autowired
     private MessageRepository messageRepository;
 
+    @Autowired
+    private AreaService areaService;
+
     public void insertCharbe(final Charge charge) {
         int day = LocalDateTime.now().getDayOfMonth();
         Integer payTime = charge.getPayTime();
@@ -73,7 +76,7 @@ public class ChargeService {
                     chargeDTO.setPayTime(charge.getBillTime()==null?charge.getBillTime()+"":charge.getBillTime().toLocalDate().toString());
                     chargeDTO.setTimeType(TimeType.getTimeType(charge.getTimeType()));
                     chargeDTO.setStatus(TimeType.getCompletionStatus(charge.getStatus()));
-                    chargeDTO.setType(charge.getType()==null? charge.getType()+"":TimeType.getArea(charge.getType()));
+                    chargeDTO.setType(charge.getType()==null? charge.getType()+"":areaService.queryArea(charge.getType()).getName());
                     chargeDTOList.add(chargeDTO);
                 });
         int count = chargeRepository.countByExample(null);
@@ -81,6 +84,7 @@ public class ChargeService {
         pageInfo.setListObject(chargeDTOList);
         return pageInfo;
     }
+
 
 
 

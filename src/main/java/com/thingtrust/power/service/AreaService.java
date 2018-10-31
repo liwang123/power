@@ -12,6 +12,7 @@ import com.thingtrust.power.data.UserRepository;
 import com.thingtrust.power.domain.Area;
 import com.thingtrust.power.domain.Charge;
 import com.thingtrust.power.domain.User;
+import com.thingtrust.power.domain.example.AreaExample;
 import com.thingtrust.power.domain.example.ChargeExample;
 import com.thingtrust.power.domain.example.UserExample;
 import com.thingtrust.power.dto.AreaDTO;
@@ -84,6 +85,10 @@ public class AreaService {
         areaRepository.updateById(area);
     }
 
+    public Area queryArea(int type){
+        Area area = areaRepository.selectById(type);
+        return area;
+    }
 
 
     public void delete(int id){
