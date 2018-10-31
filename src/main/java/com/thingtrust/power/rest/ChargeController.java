@@ -53,6 +53,12 @@ public class ChargeController {
         return ResponseResult.success(charge);
     }
 
+
+    @GetMapping("/export")
+    public ResponseResult export(){
+        return ResponseResult.success();
+    }
+
     @PostMapping("/remove")
     public ResponseResult remove(int id){
         chargeService.delete(id);

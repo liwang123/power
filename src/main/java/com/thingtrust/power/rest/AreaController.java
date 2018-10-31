@@ -3,6 +3,7 @@ package com.thingtrust.power.rest;
 
 
 import com.thingtrust.power.common.model.ResponseResult;
+import com.thingtrust.power.common.mybatis.pager.PageInfo;
 import com.thingtrust.power.domain.Area;
 import com.thingtrust.power.entity.UserEntity;
 import com.thingtrust.power.service.AreaService;
@@ -40,10 +41,25 @@ public class AreaController {
         return ResponseResult.success();
     }
 
+
+    @PostMapping("/sendSms")
+    public ResponseResult sendSms(final int id ) {
+        areaService.sendMessage(id);
+        return ResponseResult.success();
+    }
+
+
     @GetMapping("/query-all")
     public ResponseResult queryAll(){
         List<Area> areaList = areaService.queryAll();
         return ResponseResult.success(areaList);
+    }
+
+
+    @GetMapping("/query-page")
+    public ResponseResult queryPage(int index,int length){
+        PageInfo info = areaService.queryByPage(index, length);
+        return ResponseResult.success(info);
     }
 
     @PostMapping("/remove")

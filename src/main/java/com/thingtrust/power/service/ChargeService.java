@@ -11,8 +11,10 @@ import com.google.common.primitives.Ints;
 import com.thingtrust.power.common.mybatis.pager.PageInfo;
 import com.thingtrust.power.data.AreaRepository;
 import com.thingtrust.power.data.ChargeRepository;
+import com.thingtrust.power.data.MessageRepository;
 import com.thingtrust.power.domain.Area;
 import com.thingtrust.power.domain.Charge;
+import com.thingtrust.power.domain.Message;
 import com.thingtrust.power.domain.example.ChargeExample;
 import com.thingtrust.power.dto.ChargeDTO;
 import com.thingtrust.power.util.SmsUtils;
@@ -33,6 +35,9 @@ public class ChargeService {
 
     @Autowired
     private ChargeRepository chargeRepository;
+
+    @Autowired
+    private MessageRepository messageRepository;
 
     public void insertCharbe(final Charge charge) {
         int day = LocalDateTime.now().getDayOfMonth();
@@ -102,17 +107,28 @@ public class ChargeService {
         chargeExample.createCriteria()
                 .andIdIn(list);
         List<Charge> chargeList = chargeRepository.selectByExample(chargeExample);
+        sendSmsMessage(chargeList);
+
+    }
+
+    public void sendSmsMessage(List<Charge> chargeList){
         chargeList.stream()
-                .forEach(charge -> {
-                    Map<String, String> params = Maps.newHashMap();
-                    params.put("time",charge.getBillTime().toString());
-                    params.put("address",charge.getAddress());
-                    params.put("phone","1xxxxxxxxxxxx");
-                    sendSms(charge.getPhone(),params);
+            .forEach(charge -> {
+                Map<String, String> params = Maps.newHashMap();
+                params.put("time",charge.getBillTime().toLocalDate().toString());
+                params.put("address",charge.getAddress());
+                params.put("phone","1xxxxxxxxxxxx");
+                String sendSms = sendSms(charge.getPhone(), params);
+                if("OK".equals(sendSms)){
                     charge.setStatus(1);
                     chargeRepository.updateById(charge);
-                });
-
+                    Message message = Message.builder()
+                            .chargeId(charge.getId())
+                            .name(charge.getName())
+                            .build();
+                    messageRepository.insert(message);
+                }
+            });
     }
 
 
