@@ -26,4 +26,7 @@ public class SpringbootPowerApplication {
         objectMapper.registerModule(new JavaTimeModule());
         return objectMapper;
     }
+
+
+
 }
