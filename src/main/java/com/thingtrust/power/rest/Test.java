@@ -14,8 +14,8 @@ import java.util.HashMap;
 
 public class Test {
     public static void main(String[] args) throws ClientException, JsonProcessingException {
-        String url="https://api.bibox.com/v1/mdata?cmd=market&pair=TTT_BTC";
-        String s = OkHttpUtils.rpcRequestBodyPost(url,null);
+        String url="https://api5.tzscan.io/v1/info";
+        String s = OkHttpUtils.get(url,null);
         System.out.println(s);
     }
 }

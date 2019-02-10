@@ -17,6 +17,7 @@ import com.thingtrust.power.domain.Charge;
 import com.thingtrust.power.domain.Message;
 import com.thingtrust.power.domain.example.ChargeExample;
 import com.thingtrust.power.dto.ChargeDTO;
+import com.thingtrust.power.entity.ChargeEntity;
 import com.thingtrust.power.util.SmsUtils;
 import com.thingtrust.power.util.utils.TimeType;
 import org.springframework.beans.BeanUtils;
@@ -42,15 +43,18 @@ public class ChargeService {
     @Autowired
     private AreaService areaService;
 
-    public void insertCharbe(final Charge charge) {
+    public void insertCharbe(final ChargeEntity charge) {
         int day = LocalDateTime.now().getDayOfMonth();
-        Integer payTime = charge.getPayTime();
+        Integer payTime = charge.getPayTime().getDayOfMonth();
         if(payTime<day){
             charge.setBillTime(LocalDateTime.now().plusDays(payTime-day).plusMonths(TimeType.getMonths(charge.getTimeType())));
         }else {
-            charge.setBillTime(LocalDateTime.now().plusDays(payTime-day+1));
+            charge.setBillTime(LocalDateTime.now().plusDays(payTime-day));
         }
-        chargeRepository.insert(charge);
+        Charge build = Charge.builder().build();
+        BeanUtils.copyProperties(charge,build);
+        build.setPayTime(payTime);
+        chargeRepository.insert(build);
     }
 
     public void updateCharge(Charge charge){
@@ -85,7 +89,25 @@ public class ChargeService {
         return pageInfo;
     }
 
+    public List<ChargeDTO> export(int index,int length){
+        PageInfo pageInfo = new PageInfo(index,length);
+        List<Charge> chargeList = chargeRepository.selectByPager(pageInfo, null);
+        List<ChargeDTO> chargeDTOList = Lists.newArrayList();
+        chargeList.stream()
+                .forEach(charge -> {
+                    ChargeDTO chargeDTO = new ChargeDTO();
+                    BeanUtils.copyProperties(charge,chargeDTO);
+                    chargeDTO.setFinsishTime(charge.getFinsishTime()==null?charge.getFinsishTime()+"":charge.getFinsishTime().toString().replaceAll("T"," "));
+                    chargeDTO.setPayTime(charge.getBillTime()==null?charge.getBillTime()+"":charge.getBillTime().toLocalDate().toString());
+                    chargeDTO.setTimeType(TimeType.getTimeType(charge.getTimeType()));
+                    chargeDTO.setStatus(TimeType.getCompletionStatus(charge.getStatus()));
+                    chargeDTO.setType(charge.getType()==null? charge.getType()+"":areaService.queryArea(charge.getType()).getName());
+                    chargeDTOList.add(chargeDTO);
+                });
 
+        pageInfo.setListObject(chargeDTOList);
+        return chargeDTOList;
+    }
 
 
     public void delete(int id){

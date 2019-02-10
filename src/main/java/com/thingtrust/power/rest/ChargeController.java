@@ -10,14 +10,19 @@ import com.thingtrust.power.common.model.ResponseResult;
 import com.thingtrust.power.common.mybatis.pager.PageInfo;
 import com.thingtrust.power.domain.Area;
 import com.thingtrust.power.domain.Charge;
+import com.thingtrust.power.dto.ChargeDTO;
+import com.thingtrust.power.entity.ChargeEntity;
 import com.thingtrust.power.service.AreaService;
 import com.thingtrust.power.service.ChargeService;
+import com.thingtrust.power.util.ExcelUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +35,7 @@ public class ChargeController {
     private ChargeService chargeService;
 
     @PostMapping("/add")
-    public ResponseResult add(Charge charge) {
+    public ResponseResult add(ChargeEntity charge) {
         chargeService.insertCharbe(charge);
         return ResponseResult.success();
     }
@@ -55,8 +60,25 @@ public class ChargeController {
 
 
     @GetMapping("/export")
-    public ResponseResult export(){
-        return ResponseResult.success();
+    public ResponseResult export(HttpServletResponse response){
+        String excel = "";
+        String fileName="电费信息.xls";
+            List<ChargeDTO> lists =chargeService.export(1,1000000);
+            List<String> header=new ArrayList<>();
+            header.add("联系人");
+            header.add("联系方式");
+            header.add("联系人地址");
+            header.add("区域");
+            header.add("本月电费");
+            header.add("缴费时间");
+            header.add("下月预缴");
+            header.add("物业地址");
+            header.add("时间类型");
+            header.add("完成时间");
+            header.add("状态");
+            excel = ExcelUtils.exportExcel(fileName, header, lists, response);
+
+        return ResponseResult.success(excel);
     }
 
     @PostMapping("/remove")
